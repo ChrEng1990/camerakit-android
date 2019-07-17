@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                             });
                         }
                     }).start();
+                    Log.e("Flora", "Image started");
                 }
             });
         }
@@ -224,14 +225,19 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private View.OnClickListener facingFrontOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.e("Flora", "Camera front");
             cameraView.setFacing(CameraKit.FACING_FRONT);
         }
     };
 
+
     private View.OnClickListener facingBackOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            cameraView.setFacing(CameraKit.FACING_BACK);
+            Log.e("Flora", "Camera back");
+            cameraView.lockFocus();
+            //cameraView.setFacing(CameraKit.FACING_BACK);
+
         }
     };
 

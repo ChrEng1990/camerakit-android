@@ -5,10 +5,14 @@ import android.content.Context.CAMERA_SERVICE
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.hardware.camera2.params.MeteringRectangle
 import android.media.ImageReader
 import androidx.annotation.RequiresApi
+import kotlin.math.max
+import kotlin.math.min
 import android.util.Log
 import android.view.Surface
+import android.view.MotionEvent
 import com.camerakit.api.CameraApi
 import com.camerakit.api.CameraAttributes
 import com.camerakit.api.CameraEvents
@@ -17,6 +21,7 @@ import com.camerakit.api.camera2.ext.*
 import com.camerakit.type.CameraFacing
 import com.camerakit.type.CameraFlash
 import com.camerakit.type.CameraSize
+import android.app.Activity
 
 @RequiresApi(21)
 @SuppressWarnings("MissingPermission")
@@ -41,6 +46,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     private var previewStarted = false
     private var cameraFacing: CameraFacing = CameraFacing.BACK
     private var waitingFrames: Int = 0
+    private var lockedFocus = false
 
     @Synchronized
     override fun open(facing: CameraFacing) {
@@ -97,6 +103,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     override fun startPreview(surfaceTexture: SurfaceTexture) {
         val cameraDevice = cameraDevice
         val imageReader = imageReader
+        Log.e("Flora","startPreview")
         if (cameraDevice != null && imageReader != null) {
             val surface = Surface(surfaceTexture)
             cameraDevice.getCaptureSession(surface, imageReader, cameraHandler) { captureSession ->
@@ -153,6 +160,101 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         }
     }
 
+    override fun lockfocusClose() {
+        lockFocusnear()
+    }
+
+    private fun lockFocusnear(minDist: Float = 0.0f){
+        Log.e("Flora","Lock on Camera2")
+        val previewRequestBuilder = previewRequestBuilder
+        val captureSession = captureSession
+        val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
+        val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
+        val capability = cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+        Log.e("Flora", capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR).toString())
+
+        if(previewRequestBuilder != null && captureSession != null && capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR)) {
+            Log.e("Flora", "lock start")
+            val num = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE) ?: return
+
+            var value = max(num, minDist)
+
+            Log.e("Flora",value.toString())
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            lockedFocus = true
+
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+            previewRequestBuilder?.set(CaptureRequest.LENS_FOCUS_DISTANCE, value)
+
+            captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+           // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+            Log.e("Flora", "locked")
+            unlockFocus()
+        }
+    }
+
+    private fun lockFocusranged(m : MotionEvent){
+        val previewRequestBuilder = previewRequestBuilder
+        val captureSession = captureSession
+        if (previewRequestBuilder != null && captureSession != null) {
+            try {
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                captureState = STATE_WAITING_LOCK
+                waitingFrames = 0
+                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+
+                val x = m.getX(0)
+                val y = m.getY(0)
+
+                // val id = m.getPointerId(0)
+                val action = m.actionMasked
+                //  val actionIndex = m.actionIndex
+                var actionString: String
+
+                when (action) {
+
+                    MotionEvent.ACTION_DOWN -> actionString = "DOWN"
+                    MotionEvent.ACTION_UP -> actionString = "UP"
+                    MotionEvent.ACTION_POINTER_DOWN -> actionString = "PNTR DOWN"
+                    MotionEvent.ACTION_POINTER_UP -> actionString = "PNTR UP"
+                    MotionEvent.ACTION_MOVE -> actionString = "MOVE"
+                    else -> actionString = ""
+                }
+                if (actionString == "DOWN" || actionString == "PNTR DOWN") {
+
+
+                    val corrx = x
+                    val corry = y
+                    val focusArea = MeteringRectangle(max(corrx.toInt() - 25, 0), max(corry.toInt() - 25, 0), 50, 50, MeteringRectangle.METERING_WEIGHT_MAX - 1)
+                    val rectArray = Array<MeteringRectangle>(1, { focusArea })
+                    val previewRequestBuilder = previewRequestBuilder
+                    val captureSession = captureSession
+                    captureSession?.stopRepeating()
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+                    //captureRequestBuilder?.build()
+                    captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                    previewRequestBuilder?.get(CaptureRequest.CONTROL_AF_TRIGGER)
+                    captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
+
+
+                }
+
+            } catch (e: Exception) {
+            }
+        }
+    }
+
     private fun lockFocus() {
         val previewRequestBuilder = previewRequestBuilder
         val captureSession = captureSession
@@ -192,14 +294,17 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         if (captureSession != null && cameraDevice != null && imageReader != null) {
             val captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
             captureBuilder.addTarget(imageReader.surface)
+
             captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
             captureBuilder.set(CaptureRequest.FLASH_MODE, when (flash) {
                 CameraFlash.ON -> CaptureRequest.FLASH_MODE_SINGLE
+                CameraFlash.AUTO -> CaptureRequest.FLASH_MODE_SINGLE
                 else -> CaptureRequest.FLASH_MODE_OFF
             })
 
             val delay = when (flash) {
                 CameraFlash.ON -> 75L
+                CameraFlash.AUTO -> 75L
                 else -> 0L
             }
 
@@ -244,14 +349,19 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     }
                 }
                 STATE_WAITING_LOCK -> {
+                    Log.e("Flora","Waiting")
                     val afState = result.get(CaptureResult.CONTROL_AF_STATE)
                     if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState || CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
                         runPreCaptureSequence()
                     } else if (null == afState || CaptureResult.CONTROL_AF_STATE_INACTIVE == afState) {
+                        Log.e("Flora","photo inst")
                         captureStillPicture()
                     } else if (waitingFrames >= 5) {
                         waitingFrames = 0
-                        captureStillPicture()
+                        Log.e("Flora","Photo delayed")
+
+                            captureStillPicture()
+
                     } else {
                         waitingFrames++
                     }

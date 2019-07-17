@@ -132,6 +132,10 @@ class Camera1(eventsDelegate: CameraEvents) :
         }
     }
 
+    override fun lockfocusClose(){
+
+    }
+
     @Synchronized
     override fun capturePhoto(callback: (jpeg: ByteArray) -> Unit) {
         val camera = camera

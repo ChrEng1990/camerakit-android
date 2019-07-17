@@ -18,6 +18,7 @@ interface CameraActions {
     fun setFlash(flash: CameraFlash)
     fun setPhotoSize(size: CameraSize)
     fun capturePhoto(callback: (jpeg: ByteArray) -> Unit)
+    fun lockfocusClose()
 
 
 }

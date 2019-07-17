@@ -24,7 +24,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -383,6 +385,7 @@ public class CameraKitView extends GestureLayout {
     protected void onPinch(float ds, float dsx, float dsy) {
         if (mGestureListener != null) {
             mGestureListener.onPinch(this, ds, dsx, dsy);
+
         }
     }
 
@@ -390,7 +393,7 @@ public class CameraKitView extends GestureLayout {
         if (isInEditMode()) {
             return;
         }
-
+        Log.e("Flora","onStart");
         List<String> missingPermissions = getMissingPermissions();
         if (Build.VERSION.SDK_INT >= 23 && missingPermissions.size() > 0) {
             Activity activity = null;
@@ -433,6 +436,7 @@ public class CameraKitView extends GestureLayout {
         setImageMegaPixels(mImageMegaPixels);
 
         cameraFacing = getFacing() == CameraKit.FACING_BACK ? CameraFacing.BACK : CameraFacing.FRONT;
+        Log.e("Flora", cameraFacing.toString());
         mCameraPreview.start(cameraFacing);
     }
 
@@ -440,7 +444,7 @@ public class CameraKitView extends GestureLayout {
         if (isInEditMode()) {
             return;
         }
-
+        Log.e("Flora","onStop");
         mCameraPreview.stop();
     }
 
@@ -448,7 +452,7 @@ public class CameraKitView extends GestureLayout {
         if (isInEditMode()) {
             return;
         }
-
+        Log.e("Flora","onResume");
         mCameraPreview.resume();
     }
 
@@ -459,8 +463,13 @@ public class CameraKitView extends GestureLayout {
         if (isInEditMode()) {
             return;
         }
-
+        Log.e("Flora","onPause");
         mCameraPreview.pause();
+    }
+
+    public void lockFocus(){
+        Log.e("Flora","lock Focus");
+        mCameraPreview.lockFocus();
     }
 
     /**
@@ -649,6 +658,7 @@ public class CameraKitView extends GestureLayout {
      */
     public void setFacing(@CameraKit.Facing int facing) {
         mFacing = facing;
+        Log.e("Camera",mCameraPreview.getLifecycleState().toString());
         switch (mCameraPreview.getLifecycleState()) {
             case PAUSED:
             case STARTED: {
@@ -658,6 +668,7 @@ public class CameraKitView extends GestureLayout {
             }
 
             case RESUMED: {
+
                 onStop();
                 onStart();
                 onResume();
@@ -707,7 +718,13 @@ public class CameraKitView extends GestureLayout {
                     break;
                 }
                 case CameraKit.FLASH_AUTO: {
-                    throw new CameraException("FLASH_AUTO is not supported in this version of CameraKit.");
+
+
+                    if(Arrays.asList(mCameraPreview.getSupportedFlashTypes()).contains(CameraFlash.AUTO)){
+                        cameraFlash = CameraFlash.AUTO;
+                    }else {
+                        throw new CameraException("FLASH_AUTO is not supported in this version of CameraKit.");
+                    }
                 }
                 case CameraKit.FLASH_TORCH: {
                     throw new CameraException("FLASH_TORCH is not supported in this version of CameraKit.");
@@ -755,6 +772,32 @@ public class CameraKitView extends GestureLayout {
     public void setFocus(@CameraKit.Focus int focus) {
         mFocus = focus;
     }
+
+
+    public void setFocusCustom(@CameraKit.Focus int focus) {
+
+        mFocus = focus;
+        if(mFocus == CameraKit.FOCUS_CUSTOM) {
+            Log.e("Camera", mCameraPreview.getLifecycleState().toString());
+            switch (mCameraPreview.getLifecycleState()) {
+                case PAUSED:
+                case STARTED: {
+                    onStop();
+                    onStart();
+                    break;
+                }
+
+                case RESUMED: {
+
+                    onStop();
+                    onStart();
+                    onResume();
+                    break;
+                }
+            }
+        }
+    }
+
 
     /**
      * @return one of {@link CameraKit.Focus}'s constants.
@@ -909,6 +952,8 @@ public class CameraKitView extends GestureLayout {
          */
         @Override
         public void onPinch(CameraKitView view, float ds, float dsx, float dsy) {
+            Log.e("Flora","Pinch");
+
         }
 
     }

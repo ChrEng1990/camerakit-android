@@ -51,4 +51,9 @@ class ManagedCameraApi(private val delegate: CameraApi) : CameraApi by delegate 
         cameraHandler.run { delegate.capturePhoto(callback) }
     }
 
+    @Synchronized
+    override  fun lockfocusClose(){
+        cameraHandler.run {delegate.lockfocusClose() }
+    }
+
 }

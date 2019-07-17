@@ -3,6 +3,7 @@ package com.camerakit
 import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.WindowManager
 import android.widget.FrameLayout
 import com.camerakit.preview.CameraSurfaceTexture
@@ -76,7 +77,7 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     private val cameraSurfaceView: CameraSurfaceView = CameraSurfaceView(context)
 
-    private val cameraDispatcher: CoroutineDispatcher = newSingleThreadContext("CAMERA")
+    private val cameraDispatcher: CoroutineDispatcher = Dispatchers.Main//newSingleThreadContext("CAMERA")
     private var cameraOpenContinuation: Continuation<Unit>? = null
     private var previewStartContinuation: Continuation<Unit>? = null
 
@@ -134,7 +135,7 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     fun pause() {
-        GlobalScope.launch(cameraDispatcher) {
+        GlobalScope.launch(Dispatchers.Main) {
             runBlocking {
                 lifecycleState = LifecycleState.PAUSED
                 stopPreview()
@@ -143,12 +144,17 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     fun stop() {
+
         GlobalScope.launch(cameraDispatcher) {
+
             runBlocking {
                 lifecycleState = LifecycleState.STOPPED
                 closeCamera()
             }
         }
+       // Log.e("Flora Preview", lifecycleState.toString())
+        //cameraApi.release()
+
     }
 
     fun capturePhoto(callback: PhotoCallback) {
@@ -184,6 +190,9 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     // CameraEvents:
+    fun lockFocus(){
+        cameraApi.lockfocusClose()
+    }
 
     override fun onCameraOpened(cameraAttributes: CameraAttributes) {
         cameraState = CameraState.CAMERA_OPENED
@@ -303,6 +312,8 @@ class CameraPreview : FrameLayout, CameraEvents {
     private suspend fun closeCamera(): Unit = suspendCoroutine {
         cameraState = CameraState.CAMERA_CLOSING
         cameraApi.release()
+        Log.e("Flora susp", "Closing")
+        Log.e("Flora susp", lifecycleState.toString())
         it.resume(Unit)
     }
 

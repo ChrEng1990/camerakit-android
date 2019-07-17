@@ -137,6 +137,17 @@ public class CameraKit {
     public static final int FOCUS_CONTINUOUS = 2;
 
     /**
+     * <p>
+     * Related low-level constants:
+     * Camera1: {@link android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}
+     * Camera2: {@link android.hardware.camera2.CaptureRequest#CONTROL_AF_MODE_CONTINUOUS_PICTURE}
+     *
+     * @see #setFocus(int)
+     * @see #getFocus()
+     */
+    public static final int FOCUS_CUSTOM = 3;
+
+    /**
      * Describes the constant in-the-background focus strategy for when autoFocus isn't manually
      * triggered.
      */
