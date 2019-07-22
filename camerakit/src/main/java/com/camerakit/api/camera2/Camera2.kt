@@ -307,7 +307,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 CameraFlash.AUTO -> 75L
                 else -> 0L
             }
-
+            Log.e("Flora","captureStillPicture")
             cameraHandler.postDelayed({
                 captureSession.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
                     override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
@@ -319,6 +319,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     }
 
     private fun unlockFocus() {
+        Log.e("Flora","unlockfocus")
         val previewRequestBuilder = previewRequestBuilder
         val captureSession = captureSession
         if (previewRequestBuilder != null && captureSession != null) {
