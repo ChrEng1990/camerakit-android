@@ -158,7 +158,8 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     fun capturePhoto(callback: PhotoCallback) {
-        GlobalScope.launch(cameraDispatcher) {
+        Log.e("Flora","posting take Picture")
+        GlobalScope.launch(Dispatchers.Main) {
             runBlocking {
                 cameraApi.setFlash(flash)
                 cameraApi.capturePhoto {
