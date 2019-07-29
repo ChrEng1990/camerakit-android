@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                         }
                     }).start();
                     Log.e("Flora", "Image started");
+                    Log.e("Flora", Integer.toString(photo.length));
                 }
             });
         }

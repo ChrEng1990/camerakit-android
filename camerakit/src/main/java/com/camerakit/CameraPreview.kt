@@ -112,7 +112,7 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     fun start(facing: CameraFacing) {
-        GlobalScope.launch(cameraDispatcher) {
+        GlobalScope.launch(Dispatchers.Main) {
             runBlocking {
                 lifecycleState = LifecycleState.STARTED
                 cameraFacing = facing
@@ -122,7 +122,7 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     fun resume() {
-        GlobalScope.launch(cameraDispatcher) {
+        GlobalScope.launch(Dispatchers.Main) {
             runBlocking {
                 lifecycleState = LifecycleState.RESUMED
                 try {
@@ -145,7 +145,7 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     fun stop() {
 
-        GlobalScope.launch(cameraDispatcher) {
+        GlobalScope.launch(Dispatchers.Main) {
 
             runBlocking {
                 lifecycleState = LifecycleState.STOPPED
@@ -169,6 +169,7 @@ class CameraPreview : FrameLayout, CameraEvents {
                         val transformedBytes = jpeg.jpegBytes
                         jpeg.release()
                         callback.onCapture(transformedBytes)
+                        Log.e("Flora","Pic posted")
                     }
                 }
             }
