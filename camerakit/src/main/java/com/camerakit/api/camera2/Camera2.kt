@@ -174,8 +174,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 val minH = (activeRect.height() / maxZoom).toInt()
                 val difW = activeRect.width() - minW
                 val difH = activeRect.height() - minH
-                var cropW = difW / 100 * zoomLevel as Int
-                var cropH = difH / 100 * zoomLevel as Int
+                var cropW = (difW / 100 * zoomLevel).toInt()
+                var cropH = (difH / 100 * zoomLevel).toInt()
                 cropW -= cropW and 3
                 cropH -= cropH and 3
                 val rect = Rect(cropW, cropH, activeRect.width() - cropW, activeRect.height() - cropH)
