@@ -22,6 +22,7 @@ import com.camerakit.type.CameraFacing
 import com.camerakit.type.CameraFlash
 import com.camerakit.type.CameraSize
 import android.app.Activity
+import android.graphics.Rect
 
 @RequiresApi(21)
 @SuppressWarnings("MissingPermission")
@@ -160,9 +161,39 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         }
     }
 
+    override fun setZoom(zoomLevel: Float) {
+        val previewRequestBuilder = previewRequestBuilder
+        val captureSession = captureSession
+        if(previewRequestBuilder != null && captureSession != null){
+            val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
+            val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
+            val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
+            val activeRect = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+            if ((zoomLevel <= maxZoom) && (zoomLevel > 1)) {
+                val minW = (activeRect.width() / maxZoom) as Int
+                val minH = (activeRect.height() / maxZoom) as Int
+                val difW = activeRect.width() - minW
+                val difH = activeRect.height() - minH
+                var cropW = difW / 100 * zoomLevel as Int
+                var cropH = difH / 100 * zoomLevel as Int
+                cropW -= cropW and 3
+                cropH -= cropH and 3
+                val rect = Rect(cropW, cropH, activeRect.width() - cropW, activeRect.height() - cropH)
+                previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rect)
+                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+                captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
+            } else if (zoomLevel == 0.0f) {
+                val rect = Rect(0, 0, activeRect.width(), activeRect.height());
+            }
+        }
+    }
+
     override fun lockfocusClose() {
         lockFocusnear()
     }
+
+
 
     private fun lockFocusnear(minDist: Float = 0.0f){
         Log.e("Flora","Lock on Camera2")
@@ -194,6 +225,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             unlockFocus()
         }
     }
+
 
     private fun lockFocusranged(m : MotionEvent){
         val previewRequestBuilder = previewRequestBuilder

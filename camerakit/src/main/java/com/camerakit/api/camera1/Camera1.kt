@@ -61,6 +61,11 @@ class Camera1(eventsDelegate: CameraEvents) :
     }
 
     @Synchronized
+    override fun setZoom(zoomLevel: Float) {
+
+    }
+
+    @Synchronized
     override fun setPreviewSize(size: CameraSize) {
         val camera = camera
         if (camera != null) {

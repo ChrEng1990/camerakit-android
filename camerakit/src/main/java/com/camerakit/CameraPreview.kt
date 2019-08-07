@@ -196,6 +196,10 @@ class CameraPreview : FrameLayout, CameraEvents {
         cameraApi.lockfocusClose()
     }
 
+    fun setZoom(zoomLevel: Float){
+        cameraApi.setZoom(zoomLevel)
+    }
+
     override fun onCameraOpened(cameraAttributes: CameraAttributes) {
         cameraState = CameraState.CAMERA_OPENED
         attributes = cameraAttributes

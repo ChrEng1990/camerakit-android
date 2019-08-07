@@ -813,6 +813,8 @@ public class CameraKitView extends GestureLayout {
      */
     public void setZoomFactor(float zoomFactor) {
         mZoomFactor = zoomFactor;
+
+        mCameraPreview.setZoom(zoomFactor);
     }
 
     /**
@@ -953,7 +955,7 @@ public class CameraKitView extends GestureLayout {
         @Override
         public void onPinch(CameraKitView view, float ds, float dsx, float dsy) {
             Log.e("Flora","Pinch");
-
+           // view.mCameraPreview.getSupportedFlashTypes();
         }
 
     }

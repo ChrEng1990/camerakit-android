@@ -19,6 +19,7 @@ interface CameraActions {
     fun setPhotoSize(size: CameraSize)
     fun capturePhoto(callback: (jpeg: ByteArray) -> Unit)
     fun lockfocusClose()
+    fun setZoom(zoomLevel: Float)
 
 
 }
