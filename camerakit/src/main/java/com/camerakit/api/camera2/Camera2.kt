@@ -170,8 +170,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
             val activeRect = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
             if ((zoomLevel <= maxZoom) && (zoomLevel > 1)) {
-                val minW = (activeRect.width() / maxZoom) as Int
-                val minH = (activeRect.height() / maxZoom) as Int
+                val minW = (activeRect.width() / maxZoom).toInt()
+                val minH = (activeRect.height() / maxZoom).toInt()
                 val difW = activeRect.width() - minW
                 val difH = activeRect.height() - minH
                 var cropW = difW / 100 * zoomLevel as Int
