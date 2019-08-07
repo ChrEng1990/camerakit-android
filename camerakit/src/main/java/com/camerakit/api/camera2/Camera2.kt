@@ -204,7 +204,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val capability = cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
         Log.e("Flora", capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR).toString())
 
-        if(previewRequestBuilder != null && captureSession != null && capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR)) {
+        if(previewRequestBuilder != null && captureSession != null) {
             Log.e("Flora", "lock start")
             val num = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE) ?: return
 
