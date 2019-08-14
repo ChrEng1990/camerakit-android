@@ -13,6 +13,9 @@ public abstract class GestureLayout extends FrameLayout {
 
     private ScaleGestureDetector mScaleGestureDetector;
     private GestureDetector mGestureDetector;
+    private Float mSpanXbegin;
+    private Float mSpanYbegin;
+
 
     public GestureLayout(@NonNull Context context) {
         super(context);
@@ -88,19 +91,24 @@ public abstract class GestureLayout extends FrameLayout {
     private ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener = new ScaleGestureDetector.OnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            float dsx = detector.getCurrentSpanX() - detector.getPreviousSpanX();
-            float dsy = detector.getCurrentSpanY() - detector.getPreviousSpanY();
+            float dsx = detector.getCurrentSpanX() - mSpanXbegin;//detector.getCurrentSpanX() - detector.getPreviousSpanX();
+            float dsy = detector.getCurrentSpanY() - mSpanYbegin;//detector.getCurrentSpanY() - detector.getPreviousSpanY();
             performPinch(dsx, dsy);
             return true;
         }
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
+            mSpanXbegin = detector.getCurrentSpanX();
+            mSpanYbegin = detector.getCurrentSpanY();
+
             return true;
         }
 
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
+            mSpanYbegin = 0.0f;
+            mSpanXbegin = 0.0f;
         }
     };
 

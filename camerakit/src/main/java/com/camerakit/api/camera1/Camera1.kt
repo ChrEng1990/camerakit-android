@@ -66,6 +66,11 @@ class Camera1(eventsDelegate: CameraEvents) :
     }
 
     @Synchronized
+    override fun setFocusArea(x: Float, y: Float) {
+
+    }
+
+    @Synchronized
     override fun setPreviewSize(size: CameraSize) {
         val camera = camera
         if (camera != null) {

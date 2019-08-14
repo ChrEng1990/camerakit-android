@@ -141,6 +141,31 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     }
 
     @Synchronized
+    override fun setFocusArea(x: Float, y: Float){
+        val previewRequestBuilder = previewRequestBuilder
+        val captureSession = captureSession
+        val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
+        val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
+        val active = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+        val areas = cameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)
+        if(areas > 0 && previewRequestBuilder != null && captureSession != null){
+            val wa = active.width() * x
+            val ha = active.height() * y
+            val rect = Rect(wa.toInt(),ha.toInt(),(wa + 100).toInt(), (ha + 100).toInt())
+            val rectangle = MeteringRectangle(rect,1000)
+            val rectArray = Array<MeteringRectangle>(1,{rectangle})
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, rectArray)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
+
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
+            captureSession.setRepeatingRequest(previewRequestBuilder.build(),captureCallback,cameraHandler)
+
+        }
+    }
+
+    @Synchronized
     override fun setFlash(flash: CameraFlash) {
         this.flash = flash
     }

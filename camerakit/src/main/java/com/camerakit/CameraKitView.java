@@ -1,6 +1,8 @@
 package com.camerakit;
 
 import android.Manifest;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -440,6 +442,10 @@ public class CameraKitView extends GestureLayout {
         mCameraPreview.start(cameraFacing);
     }
 
+    public void onDraw(Float x, Float y){
+
+    }
+
     public void onStop() {
         if (isInEditMode()) {
             return;
@@ -470,6 +476,11 @@ public class CameraKitView extends GestureLayout {
     public void lockFocus(){
         Log.e("Flora","lock Focus");
         mCameraPreview.lockFocus();
+    }
+
+    public void setFocusArea(Float x, Float y){
+        Log.e("Flora", "setting Focus Area on x: " + x.toString() + " y: " + y.toString());
+        mCameraPreview.taptofocus(x,y);
     }
 
     /**
@@ -933,6 +944,7 @@ public class CameraKitView extends GestureLayout {
          */
         @Override
         public void onTap(CameraKitView view, float x, float y) {
+
         }
 
         /**

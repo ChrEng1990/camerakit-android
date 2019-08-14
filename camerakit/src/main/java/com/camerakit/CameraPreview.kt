@@ -1,6 +1,13 @@
 package com.camerakit
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.OvalShape
+import android.graphics.drawable.shapes.RectShape
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
@@ -77,7 +84,7 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     private val cameraSurfaceView: CameraSurfaceView = CameraSurfaceView(context)
 
-    private val cameraDispatcher: CoroutineDispatcher = Dispatchers.Main//newSingleThreadContext("CAMERA")
+    private val cameraDispatcher: CoroutineDispatcher = newSingleThreadContext("CAMERA")
     private var cameraOpenContinuation: Continuation<Unit>? = null
     private var previewStartContinuation: Continuation<Unit>? = null
 
@@ -111,54 +118,94 @@ class CameraPreview : FrameLayout, CameraEvents {
         addView(cameraSurfaceView)
     }
 
+    override fun onDraw(canvas: Canvas?) {
+        var can = canvas
+        if(can == null){
+            Log.e("Flora","No Canvas")
+           return
+        }
+
+        super.onDraw(canvas)
+        val rectShape = ShapeDrawable(RectShape())
+        rectShape.setBounds(100,100,200,200)
+        rectShape.paint.color = Color.parseColor("#000000")
+        rectShape.draw(can)
+    }
     fun start(facing: CameraFacing) {
-        GlobalScope.launch(Dispatchers.Main) {
-            runBlocking {
+        GlobalScope.launch(cameraDispatcher) {
+
                 lifecycleState = LifecycleState.STARTED
                 cameraFacing = facing
                 openCamera()
-            }
+
         }
     }
 
     fun resume() {
-        GlobalScope.launch(Dispatchers.Main) {
-            runBlocking {
+        GlobalScope.launch(cameraDispatcher) {
+
                 lifecycleState = LifecycleState.RESUMED
                 try {
                     startPreview()
                 } catch (e: Exception) {
                     // camera or surface not ready, wait.
                 }
-            }
+
         }
     }
 
     fun pause() {
-        GlobalScope.launch(Dispatchers.Main) {
-            runBlocking {
+        GlobalScope.launch(cameraDispatcher) {
+
                 lifecycleState = LifecycleState.PAUSED
                 stopPreview()
-            }
+
         }
     }
 
     fun stop() {
 
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(cameraDispatcher) {
 
-            runBlocking {
+
                 lifecycleState = LifecycleState.STOPPED
                 closeCamera()
-            }
+
         }
        // Log.e("Flora Preview", lifecycleState.toString())
         //cameraApi.release()
 
     }
 
+    fun taptofocus(x: Float, y: Float, width: Int, height: Int, color: Color{
+        cameraApi.setFocusArea(x / width,y / height)
+        if(cameraSurfaceView.holder.surface.isValid){
+            val canvas = cameraSurfaceView.holder.lockCanvas()
+            var paint = Paint()
+            paint.color = color
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 5.0f
+            canvas.drawRect(x,y,x+30,y+30,paint)
+            cameraSurfaceView.holder.unlockCanvasAndPost(canvas)
+        }
+    }
+
+    fun taptofocus(x: Float, y: Float, width: Int, height: Int){
+        cameraApi.setFocusArea(x / width,y / height)
+        if(cameraSurfaceView.holder.surface.isValid){
+           val canvas = cameraSurfaceView.holder.lockCanvas()
+            var paint = Paint()
+            paint.color = Color.parseColor("#000000")
+            paint.style = Paint.Style.STROKE
+            canvas.drawRect(x,y,x+30,y+30,paint)
+            cameraSurfaceView.holder.unlockCanvasAndPost(canvas)
+        }
+    }
+
     fun capturePhoto(callback: PhotoCallback) {
         Log.e("Flora","posting take Picture")
+        //this.addView(Canvass)
+
         GlobalScope.launch(Dispatchers.Main) {
             runBlocking {
                 cameraApi.setFlash(flash)
@@ -263,6 +310,7 @@ class CameraPreview : FrameLayout, CameraEvents {
     private suspend fun startPreview(): Unit = suspendCoroutine {
         previewStartContinuation = it
         val surfaceTexture = surfaceTexture
+
         val attributes = attributes
         if (surfaceTexture != null && attributes != null) {
             cameraState = CameraState.PREVIEW_STARTING

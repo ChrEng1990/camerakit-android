@@ -60,4 +60,9 @@ class ManagedCameraApi(private val delegate: CameraApi) : CameraApi by delegate 
     override  fun setZoom(zoomLevel: Float){
         cameraHandler.run {delegate.setZoom(zoomLevel) }
     }
+
+    @Synchronized
+    override fun setFocusArea(x: Float, y: Float) {
+        cameraHandler.run {delegate.setFocusArea(x,y)}
+    }
 }
