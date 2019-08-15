@@ -191,13 +191,15 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     fun taptofocus(x: Float, y: Float, width: Int, height: Int){
-        cameraApi.setFocusArea(x / width,y / height)
+        cameraApi.setFocusArea(x ,y )
         if(cameraSurfaceView.holder.surface.isValid){
            val canvas = cameraSurfaceView.holder.lockCanvas()
             var paint = Paint()
             paint.color = Color.parseColor("#000000")
             paint.style = Paint.Style.STROKE
-            canvas.drawRect(x,y,x+30,y+30,paint)
+            val xv = x * width
+            val yv = y * height
+            canvas.drawRect(xv,yv,xv + 30,yv + 30, paint)
             cameraSurfaceView.holder.unlockCanvasAndPost(canvas)
         }
     }
