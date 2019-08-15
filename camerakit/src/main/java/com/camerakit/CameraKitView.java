@@ -445,7 +445,7 @@ public class CameraKitView extends GestureLayout {
     }
 
     public void onDraw(Float x, Float y){
-
+        Log.e("Flora","Drawing CameraKitView");
     }
 
     public void onStop() {
@@ -482,17 +482,10 @@ public class CameraKitView extends GestureLayout {
 
     public void setFocusAreawithColor(Float x, Float y, int width, int height, int color){
         Log.e("Flora", "setting Focus Area with color on x: " + x.toString() + " y: " + y.toString());
-        float vx = x * width;
-        float vy = y * height;
+
         mCameraPreview.taptofocus(x,y, width, height);
-        Bitmap bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
-        Paint paint = new Paint();
-        paint.setColor(color);
-        paint.setStrokeWidth(5.0f);
-        paint.setStyle(Paint.Style.STROKE);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawRect(vx,vy,vx + 20,vy + 20,paint);
-        this.draw(canvas);
+
+
     }
 
     public void setFocusArea(Float x, Float y, int width, int height){
@@ -503,7 +496,7 @@ public class CameraKitView extends GestureLayout {
         mCameraPreview.taptofocus(x,y, width, height);
         Bitmap bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
         Paint paint = new Paint();
-        paint.setColor(Color.parseColor("#000000"));
+        paint.setColor(Color.parseColor("#FF0000"));
         paint.setStrokeWidth(5.0f);
         paint.setStyle(Paint.Style.STROKE);
         Canvas canvas = new Canvas(bitmap);
