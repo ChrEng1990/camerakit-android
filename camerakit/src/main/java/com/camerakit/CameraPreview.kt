@@ -177,7 +177,7 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     }
 
-    fun taptofocus(x: Float, y: Float, width: Int, height: Int, color: Color{
+    fun taptofocus(x: Float, y: Float, width: Int, height: Int, color: Int){
         cameraApi.setFocusArea(x / width,y / height)
         if(cameraSurfaceView.holder.surface.isValid){
             val canvas = cameraSurfaceView.holder.lockCanvas()
