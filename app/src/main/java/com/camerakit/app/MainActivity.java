@@ -220,6 +220,9 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 cameraView.setFlash(CameraKit.FLASH_OFF);
                 updateInfoText();
             }
+            cameraView.invalidate();
+            cameraView.postInvalidate();
+
         }
     };
 

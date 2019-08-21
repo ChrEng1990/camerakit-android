@@ -124,6 +124,7 @@ class CameraPreview : FrameLayout, CameraEvents {
             Log.e("Flora","No Canvas")
            return
         }
+        Log.e("Flora", "on Draw Preview")
 
         super.onDraw(canvas)
         val rectShape = ShapeDrawable(RectShape())

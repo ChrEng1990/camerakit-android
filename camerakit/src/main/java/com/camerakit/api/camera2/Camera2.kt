@@ -152,7 +152,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             val wa = active.width() * x
             val ha = active.height() * y
             Log.e("Flora", "Width: " + wa + " height: " + ha)
-            val rect = Rect(wa.toInt() - 100,ha.toInt() - 100,(wa + 100).toInt(), (ha + 100).toInt())
+            val rect = Rect( max(wa.toInt() - 100,0),max(ha.toInt() - 100,0),(wa + 100).toInt(), (ha + 100).toInt())
             val rectangle = MeteringRectangle(rect,1000)
             val rectArray = Array<MeteringRectangle>(1,{rectangle})
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)

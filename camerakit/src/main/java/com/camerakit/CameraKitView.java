@@ -446,13 +446,12 @@ public class CameraKitView extends GestureLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
         Log.e("Flora", "OnDraw");
+        super.onDraw(canvas);
+
     }
 
-    public void onDraw(Float x, Float y){
-        Log.e("Flora","Drawing CameraKitView");
-    }
+
 
     public void onStop() {
         if (isInEditMode()) {
