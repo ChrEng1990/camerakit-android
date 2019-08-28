@@ -45,6 +45,11 @@ class Camera1(eventsDelegate: CameraEvents) :
     }
 
     @Synchronized
+    override fun releaseFocus() {
+
+    }
+
+    @Synchronized
     override fun release() {
         camera?.release()
         camera = null

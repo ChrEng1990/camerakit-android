@@ -485,6 +485,11 @@ public class CameraKitView extends GestureLayout {
         mCameraPreview.lockFocus();
     }
 
+    public void releaseFocus(){
+        Log.e("Flora","release Focus");
+        mCameraPreview.releaseFocus();
+    }
+
     public void setFocusAreawithColor(Float x, Float y, int width, int height, int color){
         Log.e("Flora", "setting Focus Area with color on x: " + x.toString() + " y: " + y.toString());
 

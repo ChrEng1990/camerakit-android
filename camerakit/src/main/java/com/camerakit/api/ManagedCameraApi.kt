@@ -65,4 +65,9 @@ class ManagedCameraApi(private val delegate: CameraApi) : CameraApi by delegate 
     override fun setFocusArea(x: Float, y: Float) {
         cameraHandler.run {delegate.setFocusArea(x,y)}
     }
+
+    @Synchronized
+    override fun releaseFocus() {
+        cameraHandler.run{delegate.releaseFocus()}
+    }
 }

@@ -253,65 +253,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     }
 
 
-    private fun lockFocusranged(m : MotionEvent){
-        val previewRequestBuilder = previewRequestBuilder
-        val captureSession = captureSession
-        if (previewRequestBuilder != null && captureSession != null) {
-            try {
-                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
-                captureState = STATE_WAITING_LOCK
-                waitingFrames = 0
-                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
-                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
 
-                val x = m.getX(0)
-                val y = m.getY(0)
-
-                // val id = m.getPointerId(0)
-                val action = m.actionMasked
-                //  val actionIndex = m.actionIndex
-                var actionString: String
-
-                when (action) {
-
-                    MotionEvent.ACTION_DOWN -> actionString = "DOWN"
-                    MotionEvent.ACTION_UP -> actionString = "UP"
-                    MotionEvent.ACTION_POINTER_DOWN -> actionString = "PNTR DOWN"
-                    MotionEvent.ACTION_POINTER_UP -> actionString = "PNTR UP"
-                    MotionEvent.ACTION_MOVE -> actionString = "MOVE"
-                    else -> actionString = ""
-                }
-                if (actionString == "DOWN" || actionString == "PNTR DOWN") {
-
-
-                    val corrx = x
-                    val corry = y
-                    val focusArea = MeteringRectangle(max(corrx.toInt() - 25, 0), max(corry.toInt() - 25, 0), 50, 50, MeteringRectangle.METERING_WEIGHT_MAX - 1)
-                    val rectArray = Array<MeteringRectangle>(1, { focusArea })
-                    val previewRequestBuilder = previewRequestBuilder
-                    val captureSession = captureSession
-                    captureSession?.stopRepeating()
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
-                    //captureRequestBuilder?.build()
-                    captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
-
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
-                    previewRequestBuilder?.get(CaptureRequest.CONTROL_AF_TRIGGER)
-                    captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
-
-                    previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
-
-
-                }
-
-            } catch (e: Exception) {
-            }
-        }
-    }
 
     private fun lockFocus() {
         val previewRequestBuilder = previewRequestBuilder
@@ -373,6 +315,26 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     }
                 }, cameraHandler)
             }, delay)
+        }
+    }
+
+    @Synchronized
+    override fun releaseFocus() {
+        val previewRequestBuilder = previewRequestBuilder
+        val captureSession = captureSession
+        if (previewRequestBuilder != null && captureSession != null) {
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            lockedFocus = false
+
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
+
+
+            captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+            // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+            Log.e("Flora", "released")
+            unlockFocus()
         }
     }
 

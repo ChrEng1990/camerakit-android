@@ -21,6 +21,6 @@ interface CameraActions {
     fun lockfocusClose()
     fun setZoom(zoomLevel: Float)
     fun setFocusArea(x: Float, y: Float)
-
+    fun releaseFocus()
 
 }

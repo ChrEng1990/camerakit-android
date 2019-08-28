@@ -185,6 +185,10 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     }
 
+    fun releaseFocus(){
+        cameraApi.releaseFocus()
+    }
+
     fun capturePhoto(callback: PhotoCallback) {
         Log.e("Flora","posting take Picture")
         //this.addView(Canvass)
