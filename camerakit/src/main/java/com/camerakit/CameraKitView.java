@@ -400,6 +400,8 @@ public class CameraKitView extends GestureLayout {
         Log.e("Flora","onStart");
         List<String> missingPermissions = getMissingPermissions();
         if (Build.VERSION.SDK_INT >= 23 && missingPermissions.size() > 0) {
+            Log.e("Flora", "request Permissions");
+
             Activity activity = null;
             Context context = getContext();
             while (context instanceof ContextWrapper) {
@@ -491,28 +493,14 @@ public class CameraKitView extends GestureLayout {
     }
 
     public void setFocusAreawithColor(Float x, Float y, int width, int height, int color){
-        Log.e("Flora", "setting Focus Area with color on x: " + x.toString() + " y: " + y.toString());
+        Log.e("Flora", "setting Focus Area with color" + color + " on x: " + x.toString() + " y: " + y.toString());
 
         mCameraPreview.taptofocus(x,y, width, height);
 
 
     }
 
-    public void setFocusArea(Float x, Float y, int width, int height){
-        Log.e("Flora", "setting Focus Area on x: " + x.toString() + " y: " + y.toString());
-        mCameraPreview.taptofocus(x,y, width, height);
-        float vx = x * width;
-        float vy = y * height;
-        mCameraPreview.taptofocus(x,y, width, height);
-        Bitmap bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
-        Paint paint = new Paint();
-        paint.setColor(Color.parseColor("#FF0000"));
-        paint.setStrokeWidth(5.0f);
-        paint.setStyle(Paint.Style.STROKE);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawRect(vx,vy,vx + 20,vy + 20,paint);
-        this.draw(canvas);
-    }
+
 
     /**
      * @param callback

@@ -54,13 +54,16 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         cameraFacing = facing
         val cameraId = cameraManager.getCameraId(facing) ?: throw RuntimeException()
         val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
+        Log.e("Flora","opn on camera2")
         cameraManager.whenDeviceAvailable(cameraId, cameraHandler) {
+            Log.e("Flora","Device available")
             cameraManager.openCamera(cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(cameraDevice: CameraDevice) {
                     val cameraAttributes = Attributes(cameraCharacteristics, facing)
                     this@Camera2.cameraDevice = cameraDevice
                     this@Camera2.cameraAttributes = cameraAttributes
                     onCameraOpened(cameraAttributes)
+                    Log.e("Flora", "camera2 sucess")
                 }
 
                 override fun onDisconnected(cameraDevice: CameraDevice) {
@@ -74,6 +77,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     cameraDevice.close()
                     this@Camera2.cameraDevice = null
                     this@Camera2.captureSession = null
+                    Log.e("Flora","camera2 Error")
                 }
             }, cameraHandler)
         }

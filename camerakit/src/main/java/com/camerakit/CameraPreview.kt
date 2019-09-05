@@ -292,6 +292,7 @@ class CameraPreview : FrameLayout, CameraEvents {
         cameraOpenContinuation = it
         cameraState = CameraState.CAMERA_OPENING
         cameraApi.open(cameraFacing)
+        Log.e("Flora", "Open Camera intern")
     }
 
     private suspend fun startPreview(): Unit = suspendCoroutine {
