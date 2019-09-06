@@ -298,7 +298,7 @@ class CameraPreview : FrameLayout, CameraEvents {
     private suspend fun startPreview(): Unit = suspendCoroutine {
         previewStartContinuation = it
         val surfaceTexture = surfaceTexture
-
+        Log.e("Flora","starting Preview")
         val attributes = attributes
         if (surfaceTexture != null && attributes != null) {
             cameraState = CameraState.PREVIEW_STARTING
@@ -342,6 +342,7 @@ class CameraPreview : FrameLayout, CameraEvents {
         } else {
             it.resumeWithException(IllegalStateException())
             previewStartContinuation = null
+            Log.e("Flora","Surface Error")
         }
     }
 
