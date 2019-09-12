@@ -107,9 +107,10 @@ class CameraPreview : FrameLayout, CameraEvents {
 
         cameraSurfaceView.cameraSurfaceTextureListener = object : CameraSurfaceTextureListener {
             override fun onSurfaceReady(cameraSurfaceTexture: CameraSurfaceTexture) {
-                surfaceTexture = cameraSurfaceTexture
+
                 surfaceState = SurfaceState.SURFACE_AVAILABLE
                 if (lifecycleState == LifecycleState.STARTED || lifecycleState == LifecycleState.RESUMED) {
+                    Log.e("Flora","surface ready call")
                     resume()
                 }
             }
@@ -340,9 +341,14 @@ class CameraPreview : FrameLayout, CameraEvents {
             cameraApi.setPhotoSize(photoSize)
             cameraApi.startPreview(surfaceTexture)
         } else {
+            if(surfaceTexture == null) {
+                Log.e("Flora", "Surface Error")
+            }else{
+                Log.e("Flora","attribute error")
+            }
             it.resumeWithException(IllegalStateException())
             previewStartContinuation = null
-            Log.e("Flora","Surface Error")
+
         }
     }
 

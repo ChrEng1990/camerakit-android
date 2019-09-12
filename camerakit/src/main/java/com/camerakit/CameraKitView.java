@@ -468,7 +468,11 @@ public class CameraKitView extends GestureLayout {
             return;
         }
         Log.e("Flora","onResume");
+        if(mCameraPreview.getSurfaceState() == CameraPreview.SurfaceState.SURFACE_WAITING){
+            Log.e("Flora","onResume: SurfaceWaiting");
+        }
         mCameraPreview.resume();
+
     }
 
     /**

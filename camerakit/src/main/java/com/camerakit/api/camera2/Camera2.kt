@@ -71,6 +71,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     this@Camera2.cameraDevice = null
                     this@Camera2.captureSession = null
                     onCameraClosed()
+                    Log.e("FLora","camera2 Disco")
                 }
 
                 override fun onError(cameraDevice: CameraDevice, error: Int) {
