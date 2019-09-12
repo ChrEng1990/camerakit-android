@@ -107,6 +107,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     @Synchronized
     override fun startPreview(surfaceTexture: SurfaceTexture) {
         val cameraDevice = cameraDevice
+
         val imageReader = imageReader
         Log.e("Flora","startPreview")
         if (cameraDevice != null && imageReader != null) {
@@ -115,6 +116,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 this.captureSession = captureSession
 
                 if (captureSession != null) {
+                    Log.e("Flora", "Surface " + surface.toString())
                     val previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                     previewRequestBuilder.addTarget(surface)
                     previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
@@ -124,6 +126,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     this.previewRequestBuilder = previewRequestBuilder
                 }
             }
+        }else{
+            Log.e("Flora","Preview Error Camera2")
         }
     }
 
