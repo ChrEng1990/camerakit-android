@@ -111,9 +111,11 @@ class CameraPreview : FrameLayout, CameraEvents {
                 surfaceState = SurfaceState.SURFACE_AVAILABLE
                 if (lifecycleState == LifecycleState.STARTED || lifecycleState == LifecycleState.RESUMED) {
                     Log.e("Flora","surface ready call")
+                    surfaceTexture = cameraSurfaceTexture
                     resume()
                 }
             }
+
         }
 
         addView(cameraSurfaceView)
