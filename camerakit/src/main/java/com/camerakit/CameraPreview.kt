@@ -238,10 +238,14 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     override fun onCameraOpened(cameraAttributes: CameraAttributes) {
+        Log.e("Flora","camera opened")
         cameraState = CameraState.CAMERA_OPENED
         attributes = cameraAttributes
         cameraOpenContinuation?.resume(Unit)
         cameraOpenContinuation = null
+        if(surfaceState == SurfaceState.SURFACE_AVAILABLE){
+            resume()
+        }
     }
 
     override fun onCameraClosed() {
