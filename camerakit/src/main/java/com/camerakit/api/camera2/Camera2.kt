@@ -63,6 +63,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     this@Camera2.cameraDevice = cameraDevice
                     this@Camera2.cameraAttributes = cameraAttributes
                     onCameraOpened(cameraAttributes)
+
+
                     Log.e("Flora", "camera2 sucess")
                 }
 

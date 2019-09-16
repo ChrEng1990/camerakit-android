@@ -84,7 +84,7 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     private val cameraSurfaceView: CameraSurfaceView = CameraSurfaceView(context)
 
-    private val cameraDispatcher: CoroutineDispatcher = newSingleThreadContext("CAMERA")
+    private val cameraDispatcher: CoroutineDispatcher = Dispatchers.Main//newSingleThreadContext("CAMERA")
     private var cameraOpenContinuation: Continuation<Unit>? = null
     private var previewStartContinuation: Continuation<Unit>? = null
 
@@ -245,6 +245,8 @@ class CameraPreview : FrameLayout, CameraEvents {
         cameraOpenContinuation = null
         if(surfaceState == SurfaceState.SURFACE_AVAILABLE){
             resume()
+        }else{
+            Log.e("Flora", "Surface not available.")
         }
     }
 
