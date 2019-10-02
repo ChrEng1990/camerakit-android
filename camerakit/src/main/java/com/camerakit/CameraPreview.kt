@@ -107,7 +107,7 @@ class CameraPreview : FrameLayout, CameraEvents {
 
         cameraSurfaceView.cameraSurfaceTextureListener = object : CameraSurfaceTextureListener {
             override fun onSurfaceReady(cameraSurfaceTexture: CameraSurfaceTexture) {
-
+                Log.e("Flora","Surface ready: " + lifecycleState.toString())
                 surfaceState = SurfaceState.SURFACE_AVAILABLE
                 if (lifecycleState == LifecycleState.STARTED || lifecycleState == LifecycleState.RESUMED) {
                     Log.e("Flora","surface ready call")
