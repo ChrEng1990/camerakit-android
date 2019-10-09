@@ -198,6 +198,14 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         }
     }
 
+    override fun getmaxZoom(): Float{
+        val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
+        val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
+        val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
+        Log.e("Flora","maxZoom: " + maxZoom)
+        return maxZoom
+    }
+
     override fun setZoom(zoomLevel: Float) {
         val previewRequestBuilder = previewRequestBuilder
         val captureSession = captureSession

@@ -44,6 +44,10 @@ class Camera1(eventsDelegate: CameraEvents) :
         }
     }
 
+    override fun getmaxZoom():Float{
+        return 0.0f
+    }
+
     @Synchronized
     override fun releaseFocus() {
 

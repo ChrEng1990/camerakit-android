@@ -446,6 +446,10 @@ public class CameraKitView extends GestureLayout {
         mCameraPreview.start(cameraFacing);
     }
 
+    public float getmaxZoom(){
+        return mCameraPreview.getmaxZoom();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         Log.e("Flora", "OnDraw");

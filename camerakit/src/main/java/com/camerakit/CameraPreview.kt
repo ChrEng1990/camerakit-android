@@ -84,7 +84,8 @@ class CameraPreview : FrameLayout, CameraEvents {
 
     private val cameraSurfaceView: CameraSurfaceView = CameraSurfaceView(context)
 
-    private val cameraDispatcher: CoroutineDispatcher = Dispatchers.Main//newSingleThreadContext("CAMERA")
+    private val cameraDispatcher: CoroutineDispatcher = newSingleThreadContext("CAMERA")
+    private val cameraDispatcherMain: CoroutineDispatcher = Dispatchers.Main
     private var cameraOpenContinuation: Continuation<Unit>? = null
     private var previewStartContinuation: Continuation<Unit>? = null
 
@@ -182,7 +183,9 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
 
-
+    fun getmaxZoom():Float{
+        return cameraApi.getmaxZoom()
+    }
     fun taptofocus(x: Float, y: Float, width: Int, height: Int){
         cameraApi.setFocusArea(x ,y )
 
