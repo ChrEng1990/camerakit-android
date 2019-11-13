@@ -91,8 +91,8 @@ public abstract class GestureLayout extends FrameLayout {
     private ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener = new ScaleGestureDetector.OnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            float dsx = detector.getScaleFactor();//detector.getCurrentSpanX() - mSpanXbegin;//detector.getCurrentSpanX() - detector.getPreviousSpanX();
-            float dsy =( detector.getCurrentSpanY() - mSpanYbegin) + (detector.getCurrentSpanX() - mSpanXbegin);//detector.getCurrentSpanY() - detector.getPreviousSpanY();
+            float dsx = detector.getCurrentSpan();//detector.getScaleFactor();//detector.getCurrentSpanX() - mSpanXbegin;//detector.getCurrentSpanX() - detector.getPreviousSpanX();
+            float dsy = (mSpanXbegin + mSpanYbegin) / 2.0f;//( detector.getCurrentSpanY() - mSpanYbegin) + (detector.getCurrentSpanX() - mSpanXbegin);//detector.getCurrentSpanY() - detector.getPreviousSpanY();
             performPinch(dsx, dsy);
             return true;
         }

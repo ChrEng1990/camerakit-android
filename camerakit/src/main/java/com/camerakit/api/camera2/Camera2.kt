@@ -159,9 +159,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
         val active = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
         val areas = cameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)
-        if(areas > 0 && previewRequestBuilder != null && captureSession != null){
-            val wa = active.width() * x
-            val ha = active.height() * y
+        if(areas != null && areas > 0 && previewRequestBuilder != null && captureSession != null){
+            val wa = active!!.width() * x
+            val ha = active!!.height() * y
             Log.e("Flora", "Width: " + wa + " height: " + ha)
             val rect = Rect( max(wa.toInt() - 100,0),max(ha.toInt() - 100,0),(wa + 100).toInt(), (ha + 100).toInt())
             val rectangle = MeteringRectangle(rect,1000)
@@ -169,7 +169,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
-
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             captureSession.setRepeatingRequest(previewRequestBuilder.build(),captureCallback,cameraHandler)
@@ -251,23 +251,32 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
 
         if(previewRequestBuilder != null && captureSession != null) {
             Log.e("Flora", "lock start")
-            val num = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE) ?: return
+            val num = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE) ?: -1.0f
+            if(num != -1.0f) {
+                var value = max(num, minDist)
 
-            var value = max(num, minDist)
+                Log.e("Flora", value.toString())
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                lockedFocus = true
 
-            Log.e("Flora",value.toString())
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
-            lockedFocus = true
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+                previewRequestBuilder?.set(CaptureRequest.LENS_FOCUS_DISTANCE, value)
 
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
-            previewRequestBuilder?.set(CaptureRequest.LENS_FOCUS_DISTANCE, value)
+                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
-            captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                Log.e("Flora", "locked")
+                unlockFocus()
+            }else{
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                lockedFocus = true
 
-           // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
-            Log.e("Flora", "locked")
-            unlockFocus()
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                Log.e("Flora", "locked")
+                unlockFocus()
+            }
         }
     }
 
