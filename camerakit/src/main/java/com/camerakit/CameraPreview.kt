@@ -199,7 +199,7 @@ class CameraPreview : FrameLayout, CameraEvents {
         Log.e("Flora","posting take Picture")
         //this.addView(Canvass)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(cameraDispatcher) {
             runBlocking {
                 cameraApi.setFlash(flash)
                 cameraApi.capturePhoto {
