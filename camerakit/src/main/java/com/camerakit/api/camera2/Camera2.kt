@@ -355,12 +355,13 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             lockedFocus = false
 
             previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON)
 
 
             captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
             // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+            //previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
             Log.e("Flora", "released")
             unlockFocus()
         }
