@@ -190,10 +190,12 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     @Synchronized
     override fun capturePhoto(callback: (jpeg: ByteArray) -> Unit) {
         this.photoCallback = callback
-
+        Log.e("Flora", "takePhoto call")
         if (cameraFacing == CameraFacing.BACK) {
+            Log.e("Flora", "takePhoto call back")
             lockFocus()
         } else {
+            Log.e("Flora", "takePhoto call still")
             captureStillPicture()
         }
     }
@@ -265,17 +267,26 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
                 // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
                 Log.e("Flora", "locked")
-                unlockFocus()
+                //unlockFocus()
             }else{
                 previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
                 lockedFocus = true
 
                 previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
                 previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
                 Log.e("Flora", "locked")
-                unlockFocus()
+               // unlockFocus()
             }
         }
     }
@@ -339,6 +350,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             cameraHandler.postDelayed({
                 captureSession.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
                     override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+                        Log.e("Flora", "Captured")
                         unlockFocus()
                     }
                 }, cameraHandler)
