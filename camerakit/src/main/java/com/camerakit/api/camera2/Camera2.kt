@@ -333,8 +333,11 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         if (captureSession != null && cameraDevice != null && imageReader != null) {
             val captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
             captureBuilder.addTarget(imageReader.surface)
-
-            captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+            if(!lockedFocus) {
+                captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+            }else{
+                captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
+            }
             captureBuilder.set(CaptureRequest.FLASH_MODE, when (flash) {
                 CameraFlash.ON -> CaptureRequest.FLASH_MODE_SINGLE
                 CameraFlash.AUTO -> CaptureRequest.FLASH_MODE_SINGLE
@@ -372,8 +375,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
 
             captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
-            // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
-            //previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+             captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
+            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
             Log.e("Flora", "released")
             unlockFocus()
         }
