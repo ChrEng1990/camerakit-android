@@ -339,9 +339,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             }else{
                 Log.e("Flora","take Picture focus locked")
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
-                captureBuilder.set(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_OFF)
-                captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE,CaptureRequest.CONTROL_AWB_MODE_OFF)
-                
+                captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK,true)
+                captureBuilder.set(CaptureRequest.CONTROL_AWB_LOCK,true)
+
             }
             captureBuilder.set(CaptureRequest.FLASH_MODE, when (flash) {
                 CameraFlash.ON -> CaptureRequest.FLASH_MODE_SINGLE
