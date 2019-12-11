@@ -169,9 +169,13 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
-            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO)
+            //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
-            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
+            //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
+            captureSession.capture(previewRequestBuilder.build(),captureCallback,cameraHandler)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+            //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL)
+
             captureSession.setRepeatingRequest(previewRequestBuilder.build(),captureCallback,cameraHandler)
 
         }
