@@ -159,9 +159,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
         val active = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
         val areas = cameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF)
-        if(areas != null && areas > 0 && previewRequestBuilder != null && captureSession != null){
-            val wa = active!!.width() * x
-            val ha = active!!.height() * y
+        if(active != null && areas != null && areas > 0 && previewRequestBuilder != null && captureSession != null){
+            val wa = active.width() * x
+            val ha = active.height() * y
             Log.e("Flora", "Width: " + wa + " height: " + ha)
             val rect = Rect( max(wa.toInt() - 100,0),max(ha.toInt() - 100,0),(wa + 100).toInt(), (ha + 100).toInt())
             val rectangle = MeteringRectangle(rect,1000)
@@ -169,7 +169,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
-            //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO)
+            //getmaxZoompreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
             //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             captureSession.capture(previewRequestBuilder.build(),captureCallback,cameraHandler)
@@ -220,6 +220,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
             val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
             val activeRect = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+            Log.e("FloraCamAPI", activeRect.toShortString())
             if ((zoomLevel <= maxZoom) && (zoomLevel > 1)) {
                 val minW = (activeRect.width() / maxZoom).toInt()
                 val minH = (activeRect.height() / maxZoom).toInt()
