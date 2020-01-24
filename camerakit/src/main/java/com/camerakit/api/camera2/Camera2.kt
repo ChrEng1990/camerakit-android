@@ -220,8 +220,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
             val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
             val activeRect = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
-            Log.e("FloraCamAPI", activeRect.toShortString())
-            if ((zoomLevel <= maxZoom) && (zoomLevel > 1)) {
+
+            if ((zoomLevel <= maxZoom) && (zoomLevel >= 1)) {
                 val minW = (activeRect.width() / maxZoom).toInt()
                 val minH = (activeRect.height() / maxZoom).toInt()
                 val difW = activeRect.width() - minW
@@ -231,6 +231,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 cropW -= cropW and 3
                 cropH -= cropH and 3
                 val rect = Rect(cropW, cropH, activeRect.width() - cropW, activeRect.height() - cropH)
+                captureSession.abortCaptures()
                 previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rect)
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
