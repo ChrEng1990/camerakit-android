@@ -166,6 +166,10 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             val rect = Rect( max(wa.toInt() - 100,0),max(ha.toInt() - 100,0),(wa + 100).toInt(), (ha + 100).toInt())
             val rectangle = MeteringRectangle(rect,1000)
             val rectArray = Array<MeteringRectangle>(1,{rectangle})
+
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+            captureSession.capture(previewRequestBuilder.build(),captureCallback,cameraHandler)
+
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, rectArray)
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
@@ -173,9 +177,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
             //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             captureSession.capture(previewRequestBuilder.build(),captureCallback,cameraHandler)
-            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
-            //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL)
 
+            //previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
             captureSession.setRepeatingRequest(previewRequestBuilder.build(),captureCallback,cameraHandler)
 
         }
@@ -231,9 +235,10 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 cropW -= cropW and 3
                 cropH -= cropH and 3
                 val rect = Rect(cropW, cropH, activeRect.width() - cropW, activeRect.height() - cropH)
-                captureSession.abortCaptures()
+                captureSession.stopRepeating()
+
                 previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rect)
-                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                //captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
                 captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
             } else if (zoomLevel == 0.0f) {
@@ -273,8 +278,8 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
                 // captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
-                captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                //previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+                //captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
                 previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
                 captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
@@ -410,7 +415,6 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     private var captureState: Int = STATE_PREVIEW
 
     private val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-
         private fun process(result: CaptureResult) {
             when (captureState) {
                 STATE_PREVIEW -> {
