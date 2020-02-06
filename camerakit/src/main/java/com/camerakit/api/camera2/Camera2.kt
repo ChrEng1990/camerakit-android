@@ -28,7 +28,8 @@ import android.graphics.Rect
 @SuppressWarnings("MissingPermission")
 class Camera2(eventsDelegate: CameraEvents, context: Context) :
         CameraApi, CameraEvents by eventsDelegate {
-
+    private var usedFocus = -1.0f
+    private var usedRect =  Rect(0,0,0,0)
     override val cameraHandler: CameraHandler = CameraHandler.get()
 
     private val cameraManager: CameraManager =
@@ -64,7 +65,10 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                     this@Camera2.cameraAttributes = cameraAttributes
                     onCameraOpened(cameraAttributes)
 
-
+                    val activeRect = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+                    if(activeRect != null){
+                        usedRect = activeRect
+                    }
                     Log.e("Flora", "camera2 sucess")
                 }
 
@@ -211,7 +215,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     override fun getmaxZoom(): Float{
         val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
         val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
-        val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
+        val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM))!! * 10
         Log.e("Flora","maxZoom: " + maxZoom)
         return maxZoom
     }
@@ -222,27 +226,36 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         if(previewRequestBuilder != null && captureSession != null){
             val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
             val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
-            val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)) * 10
+            val maxZoom = (cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM))!! * 10
             val activeRect = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+            if(activeRect != null) {
+                if ((zoomLevel <= maxZoom) && (zoomLevel >= 1)) {
+                    val minW = (activeRect.width() / maxZoom).toInt()
+                    val minH = (activeRect.height() / maxZoom).toInt()
+                    val difW = activeRect.width() - minW
+                    val difH = activeRect.height() - minH
+                    var cropW = (difW / 100 * zoomLevel).toInt()
+                    var cropH = (difH / 100 * zoomLevel).toInt()
+                    cropW -= cropW and 3
+                    cropH -= cropH and 3
+                    val rect = Rect(cropW, cropH, activeRect.width() - cropW, activeRect.height() - cropH)
+                    captureSession.stopRepeating()
 
-            if ((zoomLevel <= maxZoom) && (zoomLevel >= 1)) {
-                val minW = (activeRect.width() / maxZoom).toInt()
-                val minH = (activeRect.height() / maxZoom).toInt()
-                val difW = activeRect.width() - minW
-                val difH = activeRect.height() - minH
-                var cropW = (difW / 100 * zoomLevel).toInt()
-                var cropH = (difH / 100 * zoomLevel).toInt()
-                cropW -= cropW and 3
-                cropH -= cropH and 3
-                val rect = Rect(cropW, cropH, activeRect.width() - cropW, activeRect.height() - cropH)
-                captureSession.stopRepeating()
+                    previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rect)
+                    //captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
-                previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rect)
-                //captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                    captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                    usedRect = rect
+                } else if (zoomLevel == 0.0f) {
+                    val rect = Rect(0, 0, activeRect.width(), activeRect.height());
+                    captureSession.stopRepeating()
 
-                captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
-            } else if (zoomLevel == 0.0f) {
-                val rect = Rect(0, 0, activeRect.width(), activeRect.height());
+                    previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rect)
+                    //captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+
+                    captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
+                    usedRect = rect
+                }
             }
         }
     }
@@ -260,7 +273,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
         val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
         val capability = cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
-        Log.e("Flora", capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR).toString())
+        Log.e("Flora", capability?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR).toString())
 
         if(previewRequestBuilder != null && captureSession != null) {
             Log.e("Flora", "lock start")
@@ -269,11 +282,11 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 var value = max(num, minDist)
 
                 Log.e("Flora", value.toString())
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
                 lockedFocus = true
 
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
-                previewRequestBuilder?.set(CaptureRequest.LENS_FOCUS_DISTANCE, value)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+                previewRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, value)
 
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
@@ -284,19 +297,21 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
                 captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
                 Log.e("Flora", "locked")
+                usedFocus = value
                 //unlockFocus()
             }else{
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
                 lockedFocus = true
 
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF)
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
-                previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
                 captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
                 Log.e("Flora", "locked")
+
                // unlockFocus()
             }
         }
@@ -350,8 +365,12 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
             }else{
                 Log.e("Flora","take Picture focus locked")
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
+                if(usedFocus != -1.0f){
+                    captureBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, usedFocus)
+                }
                 captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK,true)
                 captureBuilder.set(CaptureRequest.CONTROL_AWB_LOCK,true)
+
 
             }
             captureBuilder.set(CaptureRequest.FLASH_MODE, when (flash) {
@@ -364,6 +383,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 CameraFlash.ON -> 75L
                 CameraFlash.AUTO -> 75L
                 else -> 0L
+            }
+            if(!usedRect.isEmpty){
+                captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, usedRect)
             }
             Log.e("Flora","captureStillPicture")
             cameraHandler.postDelayed({
@@ -382,19 +404,20 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val previewRequestBuilder = previewRequestBuilder
         val captureSession = captureSession
         if (previewRequestBuilder != null && captureSession != null) {
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
             lockedFocus = false
 
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON)
 
 
             captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
 
-            captureSession?.capture(previewRequestBuilder!!.build(), captureCallback, cameraHandler)
-            previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+            captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
+            previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
             Log.e("Flora", "released")
             unlockFocus()
+            usedFocus = -1.0f
         }
     }
 
