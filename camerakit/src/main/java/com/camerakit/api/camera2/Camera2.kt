@@ -268,6 +268,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
 
     private fun lockFocusnear(minDist: Float = 0.0f){
         Log.e("Flora","Lock on Camera2")
+
         val previewRequestBuilder = previewRequestBuilder
         val captureSession = captureSession
         val cameraId = cameraManager.getCameraId(cameraFacing) ?: throw RuntimeException()
@@ -325,7 +326,10 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val captureSession = captureSession
         if (previewRequestBuilder != null && captureSession != null) {
             try {
-                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                if(!lockedFocus) {
+
+                    previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+                }
                 captureState = STATE_WAITING_LOCK
                 waitingFrames = 0
                 captureSession.capture(previewRequestBuilder.build(), captureCallback, cameraHandler)
