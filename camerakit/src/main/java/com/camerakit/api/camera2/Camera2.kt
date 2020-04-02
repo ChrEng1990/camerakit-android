@@ -203,13 +203,13 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
     override fun capturePhoto(callback: (jpeg: ByteArray) -> Unit) {
         this.photoCallback = callback
         Log.e("Flora", "takePhoto call")
-        if (cameraFacing == CameraFacing.BACK) {
+        /*if (cameraFacing == CameraFacing.BACK) {
             Log.e("Flora", "takePhoto call back")
             lockFocus()
-        } else {
+        } else {*/
             Log.e("Flora", "takePhoto call still")
             captureStillPicture()
-        }
+       // }
     }
 
     override fun getmaxZoom(): Float{
@@ -275,7 +275,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
         val capability = cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
         Log.e("Flora", capability?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR).toString())
-
+        if(capability != null && !(capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR))){
+            return
+        }
         if(previewRequestBuilder != null && captureSession != null) {
             Log.e("Flora", "lock start")
             val num = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE) ?: -1.0f
@@ -396,7 +398,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 captureSession.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
                     override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                         Log.e("Flora", "Captured")
-                        unlockFocus()
+                        //unlockFocus()
                     }
                 }, cameraHandler)
             }, delay)
