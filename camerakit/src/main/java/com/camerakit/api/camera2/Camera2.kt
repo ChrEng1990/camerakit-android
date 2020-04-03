@@ -260,13 +260,13 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         }
     }
 
-    override fun lockfocusClose() {
-        lockFocusnear()
+    override fun lockfocusClose(): Boolean {
+       return lockFocusnear()
     }
 
 
 
-    private fun lockFocusnear(minDist: Float = 0.0f){
+    private fun lockFocusnear(minDist: Float = 0.0f): Boolean{
         Log.e("Flora","Lock on Camera2")
 
         val previewRequestBuilder = previewRequestBuilder
@@ -276,7 +276,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
         val capability = cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
         Log.e("Flora", capability?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR).toString())
         if(capability != null && !(capability.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR))){
-            return
+            return false
         }
         if(previewRequestBuilder != null && captureSession != null) {
             Log.e("Flora", "lock start")
@@ -302,6 +302,7 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 Log.e("Flora", "locked")
                 usedFocus = value
                 //unlockFocus()
+                return true
             }else{
                 previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
                 lockedFocus = true
@@ -314,10 +315,11 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
                 previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
                 captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
                 Log.e("Flora", "locked")
-
+                return true
                // unlockFocus()
             }
         }
+        return false
     }
 
 

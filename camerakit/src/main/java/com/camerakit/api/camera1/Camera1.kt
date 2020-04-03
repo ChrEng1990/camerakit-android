@@ -151,8 +151,8 @@ class Camera1(eventsDelegate: CameraEvents) :
         }
     }
 
-    override fun lockfocusClose(){
-
+    override fun lockfocusClose(): Boolean{
+        return false
     }
 
     @Synchronized

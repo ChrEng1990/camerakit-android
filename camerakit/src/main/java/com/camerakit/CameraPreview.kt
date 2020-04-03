@@ -232,8 +232,8 @@ class CameraPreview : FrameLayout, CameraEvents {
     }
 
     // CameraEvents:
-    fun lockFocus(){
-        cameraApi.lockfocusClose()
+    fun lockFocus(): Boolean{
+       return cameraApi.lockfocusClose()
     }
 
     fun setZoom(zoomLevel: Float){

@@ -490,9 +490,9 @@ public class CameraKitView extends GestureLayout {
         mCameraPreview.pause();
     }
 
-    public void lockFocus(){
+    public Boolean lockFocus(){
         Log.e("Flora","lock Focus");
-        mCameraPreview.lockFocus();
+        return mCameraPreview.lockFocus();
     }
 
     public void releaseFocus(){
