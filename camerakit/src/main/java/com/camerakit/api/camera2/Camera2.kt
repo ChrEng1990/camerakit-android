@@ -246,6 +246,9 @@ class Camera2(eventsDelegate: CameraEvents, context: Context) :
 
                     captureSession.setRepeatingRequest(previewRequestBuilder.build(), captureCallback, cameraHandler)
                     usedRect = rect
+                    if(lockedFocus){
+                        lockfocusClose()
+                    }
                 } else if (zoomLevel == 0.0f) {
                     val rect = Rect(0, 0, activeRect.width(), activeRect.height());
                     captureSession.stopRepeating()
